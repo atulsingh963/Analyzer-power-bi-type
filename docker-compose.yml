@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  analyzer:
+    build: .
+    container_name: analyzer-platform
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=YOUR_PRODUCTION_JWT_SECRET_KEY_HERE
+      - STORAGE_SECRET=YOUR_PRODUCTION_NICEGUI_SECRET_KEY_HERE
+    volumes:
+      - ./data:/app/data
+    restart: always
