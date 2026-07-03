@@ -1,6 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, Text, JSON
 from sqlalchemy.orm import declarative_base, relationship
+
+def utc_now():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
 
 Base = declarative_base()
 
@@ -20,7 +23,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id"), nullable=False)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     
     role = relationship("Role", back_populates="users")
     workspaces = relationship("Workspace", back_populates="owner")
@@ -32,7 +35,7 @@ class Workspace(Base):
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     
     owner = relationship("User", back_populates="workspaces")
     dashboards = relationship("Dashboard", back_populates="workspace")
@@ -47,8 +50,8 @@ class Dashboard(Base):
     layout = Column(JSON, nullable=True)  # JSON representation of grid layout & widget references
     is_shared = Column(Boolean, default=False)
     version = Column(Integer, default=1)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
     
     workspace = relationship("Workspace", back_populates="dashboards")
     widgets = relationship("Widget", back_populates="dashboard", cascade="all, delete-orphan")
@@ -72,7 +75,7 @@ class Dataset(Base):
     file_type = Column(String(20), nullable=False)  # CSV/Parquet
     schema_info = Column(JSON, nullable=True)  # Column names, types, description
     workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
     
     workspace = relationship("Workspace", back_populates="datasets")
 
@@ -82,7 +85,7 @@ class DataSource(Base):
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)  # PostgreSQL, MySQL, CSV, Excel, etc.
     connection_params = Column(Text, nullable=True)  # Encrypted connection string parameters JSON
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 class ETLJob(Base):
     __tablename__ = "etl_jobs"
@@ -101,7 +104,7 @@ class AuditLog(Base):
     target_type = Column(String(50), nullable=True)
     target_id = Column(Integer, nullable=True)
     details = Column(JSON, nullable=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=utc_now)
     
     user = relationship("User", back_populates="audit_logs")
 
@@ -112,7 +115,7 @@ class AIInsight(Base):
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)  # Markdown text explaining findings
     category = Column(String(50), nullable=False)  # alert, prediction, opportunity, risk
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
 class Forecast(Base):
     __tablename__ = "forecasts"
@@ -122,4 +125,4 @@ class Forecast(Base):
     date_column = Column(String(100), nullable=False)
     forecast_data = Column(JSON, nullable=False)  # Historic + predicted data values
     parameters = Column(JSON, nullable=True)  # Parameters used in ARIMA/Holt-Winters execution
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)

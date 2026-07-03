@@ -6,7 +6,8 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 # Set environment variable for testing
-os.environ["SECRET_KEY"] = "TEST_SECRET_KEY_FOR_UNIT_TESTS"
+os.environ["SECRET_KEY"] = "TEST_SECRET_KEY_FOR_UNIT_TESTS_EXCEEDING_32_BYTES"
+
 
 from database.db import SessionLocal, init_db
 from backend.models.models import User, Role, Dataset, Dashboard

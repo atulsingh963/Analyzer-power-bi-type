@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import polars as pl
 from sqlalchemy.orm import Session
 from backend.models.models import Dataset, ETLJob, Workspace
@@ -154,14 +154,14 @@ class ETLEngine:
                 db.add(new_ds)
                 
             job.status = "Success"
-            job.last_run = datetime.utcnow()
+            job.last_run = datetime.now(timezone.utc).replace(tzinfo=None)
             db.commit()
             return {"success": True, "dataset_name": job.name, "rows": df.height}
             
         except Exception as e:
             db.rollback()
             job.status = "Failed"
-            job.last_run = datetime.utcnow()
+            job.last_run = datetime.now(timezone.utc).replace(tzinfo=None)
             db.commit()
             return {"success": False, "error": str(e)}
         finally:
